@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:mydb
     username: sa
-    password: password
+    password:
     driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -16,3 +16,8 @@ spring:
       path: /h2
       settings:
         web-allow-others: true
+
+server:
+  port: 8080
+  servlet:
+    context-path: /account-management
