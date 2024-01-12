@@ -34,8 +34,9 @@ public class AccountController {
 
     @PostMapping
     public ResponseEntity<PostResponseDTO> create(
-            @RequestBody @Valid CreateAccountRequestDTO account) {
-        Account createdAccount = accountService.create(account);
+            @RequestBody @Valid CreateAccountRequestDTO account,
+            @PathVariable Long customerId) {
+        Account createdAccount = accountService.create(account, customerId);
 
         URI locationResource = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

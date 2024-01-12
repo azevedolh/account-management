@@ -17,7 +17,4 @@ public class CreateAccountRequestDTO {
 
     @NotNull
     private BigDecimal balance;
-
-    @NotNull
-    private Long customerId;
 }

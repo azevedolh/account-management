@@ -1,8 +1,8 @@
 package br.com.teste.accountmanagement.mapper.impl;
 
-import br.com.teste.accountmanagement.dto.response.TransactionResponseDTO;
+import br.com.teste.accountmanagement.dto.response.NewTransactionResponseDTO;
 import br.com.teste.accountmanagement.enumerator.OperationEnum;
-import br.com.teste.accountmanagement.mapper.TransactionResponseMapper;
+import br.com.teste.accountmanagement.mapper.NewTransactionResponseMapper;
 import br.com.teste.accountmanagement.model.Transaction;
 import org.springframework.stereotype.Component;
 
@@ -10,21 +10,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class TransactionResponseMapperImpl implements TransactionResponseMapper {
+public class NewTransactionResponseMapperImpl implements NewTransactionResponseMapper {
 
     @Override
-    public TransactionResponseDTO toDto(Transaction entity, Long accountNumber) {
+    public NewTransactionResponseDTO toDto(Transaction entity, Long accountNumber) {
         if ( entity == null ) {
             return null;
         }
 
-        TransactionResponseDTO.TransactionResponseDTOBuilder transactionResponseDTO = TransactionResponseDTO.builder();
+        NewTransactionResponseDTO.NewTransactionResponseDTOBuilder transactionResponseDTO = NewTransactionResponseDTO.builder();
 
         transactionResponseDTO.id( entity.getId() );
         transactionResponseDTO.amount( entity.getAmount() );
-        transactionResponseDTO.createdAt( entity.getCreatedAt() );
-        transactionResponseDTO.updatedAt( entity.getUpdatedAt() );
-
         if ( entity.getStatus() != null ) {
             transactionResponseDTO.status( entity.getStatus().name() );
         }
@@ -41,12 +38,12 @@ public class TransactionResponseMapperImpl implements TransactionResponseMapper 
     }
 
     @Override
-    public List<TransactionResponseDTO> toDto(List<Transaction> dtoList, Long accountNumber) {
+    public List<NewTransactionResponseDTO> toDto(List<Transaction> dtoList, Long accountNumber) {
         if ( dtoList == null && accountNumber != null) {
             return null;
         }
 
-        List<TransactionResponseDTO> list = new ArrayList<TransactionResponseDTO>( dtoList.size() );
+        List<NewTransactionResponseDTO> list = new ArrayList<NewTransactionResponseDTO>( dtoList.size() );
         for ( Transaction transaction : dtoList ) {
             list.add( toDto( transaction, accountNumber ) );
         }

@@ -10,5 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AccountRepository extends JpaRepository<Account, Long> {
 
-    Page<Account> findAllByCustomer(PageRequest pageRequest, Customer customer);
+    Page<Account> findAllByCustomerAndIsActive(PageRequest pageRequest, Customer customer, Boolean isActive);
 }

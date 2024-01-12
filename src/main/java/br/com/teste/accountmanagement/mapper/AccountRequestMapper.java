@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface AccountRequestMapper extends EntityMapper<CreateAccountRequestDTO, Account> {
 
-    @Mapping(source = "customerId", target = "customer.id")
     @Mapping(target = "isActive", constant = "true")
     Account toEntity(CreateAccountRequestDTO dto);
 }

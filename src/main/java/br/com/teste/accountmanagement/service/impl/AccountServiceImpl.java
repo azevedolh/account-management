@@ -2,6 +2,8 @@ package br.com.teste.accountmanagement.service.impl;
 
 import br.com.teste.accountmanagement.dto.request.CreateAccountRequestDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
+import br.com.teste.accountmanagement.enumerator.OperationEnum;
+import br.com.teste.accountmanagement.exception.CustomBusinessException;
 import br.com.teste.accountmanagement.mapper.AccountRequestMapper;
 import br.com.teste.accountmanagement.mapper.AccountResponseMapper;
 import br.com.teste.accountmanagement.mapper.PageableMapper;
@@ -15,12 +17,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -49,7 +49,7 @@ public class AccountServiceImpl implements AccountService {
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, sortProperties);
         PageResponseDTO pageResponseDTO = new PageResponseDTO();
-        Page<Account> accountPage = accountRepository.findAllByCustomer(pageRequest, customer);
+        Page<Account> accountPage = accountRepository.findAllByCustomerAndIsActive(pageRequest, customer, Boolean.TRUE);
 
         if (accountPage != null) {
             pageResponseDTO.set_pageable(pageableMapper.toDto(accountPage));
@@ -60,8 +60,10 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account create(CreateAccountRequestDTO accountRequest) {
+    public Account create(CreateAccountRequestDTO accountRequest, Long customerId) {
+        Customer customer = customerService.getById(customerId);
         Account account = accountRequestMapper.toEntity(accountRequest);
+        account.setCustomer(customer);
         return accountRepository.save(account);
     }
 
@@ -70,25 +72,36 @@ public class AccountServiceImpl implements AccountService {
         Optional<Account> accountOptional = accountRepository.findById(id);
 
         if (accountOptional.isEmpty()) {
-            throw new RuntimeException("Conta numero " + id + " não encontrada.");
+            throw new CustomBusinessException(HttpStatus.NOT_FOUND, "Conta numero " + id + " não encontrada.");
         }
 
         return accountOptional.get();
     }
 
     @Override
-    public void updateBalance(Long origin, Long destination, BigDecimal amount) {
-        Account originAccount = getById(origin);
-        Account destinationAccount = getById(destination);
+    public void updateBalance(Long accountId, OperationEnum operation, BigDecimal amount) throws CustomBusinessException {
 
-        if (amount.compareTo(originAccount.getBalance()) > 0) {
-            throw new RuntimeException("Conta não possui saldo suficiente para o pagamento");
+        Account account = getById(accountId);
+
+        if (operation == null) {
+            throw new CustomBusinessException("Operação não informada");
         }
 
-        originAccount.setBalance(originAccount.getBalance().subtract(amount));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+        if (amount == null || amount.compareTo(new BigDecimal("0")) <= 0) {
+            throw new CustomBusinessException("Valor informado para operação inválido");
+        }
 
-        accountRepository.saveAll(Arrays.asList(originAccount, destinationAccount));
+        if (OperationEnum.DEBITO == operation) {
+            if (amount.compareTo(account.getBalance()) > 0) {
+                throw new CustomBusinessException("Conta não possui saldo suficiente para o pagamento");
+            }
+
+            account.setBalance(account.getBalance().subtract(amount));
+        } else {
+            account.setBalance(account.getBalance().add(amount));
+        }
+
+        accountRepository.save(account);
     }
 
 

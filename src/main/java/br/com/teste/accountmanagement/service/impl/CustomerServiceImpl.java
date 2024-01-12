@@ -2,6 +2,7 @@ package br.com.teste.accountmanagement.service.impl;
 
 import br.com.teste.accountmanagement.dto.request.CreateCustomerRequestDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
+import br.com.teste.accountmanagement.exception.CustomBusinessException;
 import br.com.teste.accountmanagement.mapper.CustomerRequestMapper;
 import br.com.teste.accountmanagement.mapper.CustomerResponseMapper;
 import br.com.teste.accountmanagement.mapper.PageableMapper;
@@ -14,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Order;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -57,7 +59,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> existingCustomer = customerRepository.findByDocument(customerRequest.getDocument());
 
         if (existingCustomer.isPresent()) {
-            throw new RuntimeException("Já existe um cliente cadastrado com este documento");
+            throw new CustomBusinessException("Já existe um cliente cadastrado com este documento");
         }
 
         Customer customer = customerRequestMapper.toEntity(customerRequest);
@@ -72,7 +74,7 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(id);
 
         if (customerOptional.isEmpty()) {
-            throw new RuntimeException("Cliente com Id " + id + " não encontrado.");
+            throw new CustomBusinessException(HttpStatus.NOT_FOUND, "Cliente com Id " + id + " não encontrado.");
         }
 
         return customerOptional.get();

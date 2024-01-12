@@ -3,9 +3,7 @@ package br.com.teste.accountmanagement.controller;
 import br.com.teste.accountmanagement.dto.request.CancelTransactionRequestDTO;
 import br.com.teste.accountmanagement.dto.request.CreateTransactionRequestDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
-import br.com.teste.accountmanagement.dto.response.PostResponseDTO;
-import br.com.teste.accountmanagement.dto.response.TransactionResponseDTO;
-import br.com.teste.accountmanagement.model.Transaction;
+import br.com.teste.accountmanagement.dto.response.NewTransactionResponseDTO;
 import br.com.teste.accountmanagement.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -35,33 +33,30 @@ public class TransactionController {
     }
 
     @PostMapping("/transactions")
-    public ResponseEntity<PostResponseDTO> create(
+    public ResponseEntity<NewTransactionResponseDTO> create(
             @RequestBody @Valid CreateTransactionRequestDTO transaction,
-            @PathVariable Long accountId) {
-        Transaction createdTransaction = transactionService.create(transaction, accountId);
+            @PathVariable Long accountId,
+            @PathVariable Long customerId) {
+        NewTransactionResponseDTO createdTransaction = transactionService.create(transaction, accountId, customerId);
 
         URI locationResource = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(createdTransaction.getId())
                 .toUri();
         log.info("Successfully created Transaction with ID: " + createdTransaction.getId());
-        return ResponseEntity.created(locationResource).body(PostResponseDTO.builder().id(createdTransaction.getId()).build());
+        return ResponseEntity.created(locationResource).body(createdTransaction);
     }
 
     @PostMapping("/transactions:cancel")
-    public ResponseEntity<TransactionResponseDTO> cancel(
+    public ResponseEntity<NewTransactionResponseDTO> cancel(
             @RequestBody @Valid CancelTransactionRequestDTO transaction,
             @PathVariable Long accountId) {
-        TransactionResponseDTO createdTransaction = transactionService.cancel(transaction, accountId);
+        NewTransactionResponseDTO createdTransaction = transactionService.cancel(transaction, accountId);
 
-        URI locationResource = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(createdTransaction.getId())
-                .toUri();
         log.info("Successfully cancelled Transaction with ID: "
                 + transaction.getId()
                 + " and created Transaction with ID: "
                 + createdTransaction.getId());
-        return new ResponseEntity<TransactionResponseDTO>(createdTransaction, HttpStatus.OK);
+        return new ResponseEntity<NewTransactionResponseDTO>(createdTransaction, HttpStatus.OK);
     }
 }
