@@ -1,0 +1,20 @@
+package br.com.teste.accountmanagement.dto.response;
+
+import lombok.*;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransactionResponseDTO {
+    private Long id;
+    private String type;
+    private BigDecimal amount;
+    private String status;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
+}
