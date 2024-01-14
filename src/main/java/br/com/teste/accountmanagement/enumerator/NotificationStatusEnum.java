@@ -7,10 +7,6 @@ public enum NotificationStatusEnum {
     private final Long code;
     private final String description;
 
-    public Long getCode() {
-        return code;
-    }
-
     public String getDescription() {
         return description;
     }

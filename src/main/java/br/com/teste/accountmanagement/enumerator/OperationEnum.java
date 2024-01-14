@@ -7,14 +7,6 @@ public enum OperationEnum {
     private final Long code;
     private final String description;
 
-    public Long getCode() {
-        return code;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
     OperationEnum(Long code, String description) {
         this.code = code;
         this.description = description;

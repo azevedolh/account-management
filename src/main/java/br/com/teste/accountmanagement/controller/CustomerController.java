@@ -1,9 +1,9 @@
 package br.com.teste.accountmanagement.controller;
 
 import br.com.teste.accountmanagement.dto.request.CreateCustomerRequestDTO;
+import br.com.teste.accountmanagement.dto.response.CustomerResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PostResponseDTO;
-import br.com.teste.accountmanagement.model.Customer;
 import br.com.teste.accountmanagement.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +36,7 @@ public class CustomerController {
     @PostMapping
     public ResponseEntity<PostResponseDTO> create(
             @RequestBody @Valid CreateCustomerRequestDTO customer) {
-        Customer createdCustomer = customerService.create(customer);
+        CustomerResponseDTO createdCustomer = customerService.create(customer);
 
         URI locationResource = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

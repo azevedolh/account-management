@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 public class CreateTransactionRequestDTO {
 
     @NotNull
-    private Long destination;
+    private Long destinationAccount;
 
     @NotNull
     private BigDecimal amount;

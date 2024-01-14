@@ -1,4 +1,4 @@
-package br.com.teste.accountmanagement.dto;
+package br.com.teste.accountmanagement.dto.response;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
@@ -21,4 +21,6 @@ public class ApiErrorResponseDTO {
         this.message = message;
         this.details = details;
     }
+
+    public ApiErrorResponseDTO() {}
 }

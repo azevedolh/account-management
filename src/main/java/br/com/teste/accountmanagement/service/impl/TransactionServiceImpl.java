@@ -30,6 +30,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,8 +61,12 @@ public class TransactionServiceImpl implements TransactionService {
     private NotificationService notificationService;
 
     @Override
-    public PageResponseDTO getTransactions(Long accountId, Integer page, Integer size, String sort) {
+    public PageResponseDTO getTransactions(Long customerId, Long accountId, Integer page, Integer size, String sort) {
         Account account = accountService.getById(accountId);
+
+        if (!account.getCustomer().getId().equals(customerId)) {
+            throw new CustomBusinessException("Conta " + accountId + " não pertence ao cliente de id: " + customerId);
+        }
 
         Sort sortProperties = PaginationUtils.getSort(sort, Sort.Direction.DESC, "createdAt");
 
@@ -80,10 +85,20 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     @Transactional
     public NewTransactionResponseDTO create(CreateTransactionRequestDTO transactionRequest, Long origin, Long originCustomer) {
+        Account account = accountService.getById(origin);
+
+        if (!account.getCustomer().getId().equals(originCustomer)) {
+            throw new CustomBusinessException("Não é possível realizar o pagamento.",
+                    "Conta " + origin + " não pertence ao cliente de id: " + originCustomer);
+        }
+
+        if (transactionRequest.getDestinationAccount().equals(origin)) {
+            throw new CustomBusinessException("Não é possível realizar pagamento para conta de origem");
+        }
 
         try {
             accountService.updateBalance(origin, OperationEnum.DEBITO, transactionRequest.getAmount());
-            accountService.updateBalance(transactionRequest.getDestination(), OperationEnum.CREDITO, transactionRequest.getAmount());
+            accountService.updateBalance(transactionRequest.getDestinationAccount(), OperationEnum.CREDITO, transactionRequest.getAmount());
         } catch (Exception e) {
             log.error("Erro ao realizar processo de atualização de saldo", e);
             throw new CustomBusinessException("Erro ao realizar processo de atualização de saldo.", e.getMessage());
@@ -93,19 +108,24 @@ public class TransactionServiceImpl implements TransactionService {
         transaction = transactionRepository.save(transaction);
         NewTransactionResponseDTO newTransactionResponseDTO = newTransactionResponseMapper.toDto(transaction, origin);
 
-        Account destinationAccount = accountService.getById(transactionRequest.getDestination());
+        Account destinationAccount = accountService.getById(transactionRequest.getDestinationAccount());
 
-        List<NotificationResultDTO> notificationList = treatNotifications(originCustomer, destinationAccount);
+        List<NotificationResultDTO> notificationList = treatNotifications(
+                originCustomer,
+                destinationAccount.getCustomer().getId(),
+                transactionRequest.getAmount()
+        );
 
         newTransactionResponseDTO.setNotificationResult(notificationList);
         return newTransactionResponseDTO;
     }
 
-    private List<NotificationResultDTO> treatNotifications(Long originCustomer, Account destinationAccount) {
+    private List<NotificationResultDTO> treatNotifications(Long originCustomer, Long destinationCustomer, BigDecimal amount) {
         List<NotificationResultDTO> notificationList = new ArrayList<>();
 
         try {
-            notificationService.sendNotification(originCustomer);
+            notificationService.sendNotification(originCustomer,
+                    "Realizado pagamento de R$" + amount + " Reais");
             notificationList.add(NotificationResultDTO.builder()
                     .accountType(NotificationAccountTypeEnum.ORIGIN)
                     .notificationStatus(NotificationStatusEnum.SENT)
@@ -120,11 +140,12 @@ public class TransactionServiceImpl implements TransactionService {
                     .build());
         }
 
-        if (!originCustomer.equals(destinationAccount.getCustomer().getId())) {
+        if (!originCustomer.equals(destinationCustomer)) {
             try {
-                notificationService.sendNotification(destinationAccount.getCustomer().getId());
+                notificationService.sendNotification(destinationCustomer,
+                        "Recebido pagamento de R$" + amount + " Reais");
                 notificationList.add(NotificationResultDTO.builder()
-                        .accountType(NotificationAccountTypeEnum.ORIGIN)
+                        .accountType(NotificationAccountTypeEnum.DESTINATION)
                         .notificationStatus(NotificationStatusEnum.SENT)
                         .message(NotificationStatusEnum.SENT.getDescription())
                         .build());
@@ -145,10 +166,15 @@ public class TransactionServiceImpl implements TransactionService {
     @Transactional
     public NewTransactionResponseDTO cancel(CancelTransactionRequestDTO transactionRequest, Long accountId) {
         Transaction transaction = getById(transactionRequest.getId());
+
+        if (TransactionStatusEnum.ANULADO.equals(transaction.getStatus())) {
+            throw new CustomBusinessException("Não é possível cancelar uma transação anulada");
+        }
+
         Account destinationAccount = accountService.getById(transaction.getDestination().getId());
 
         CreateTransactionRequestDTO createTransactionRequestDTO = CreateTransactionRequestDTO.builder()
-                .destination(transaction.getOrigin().getId())
+                .destinationAccount(transaction.getOrigin().getId())
                 .amount(transaction.getAmount())
                 .build();
 
@@ -175,6 +201,4 @@ public class TransactionServiceImpl implements TransactionService {
 
         return transactionOptional.get();
     }
-
-
 }

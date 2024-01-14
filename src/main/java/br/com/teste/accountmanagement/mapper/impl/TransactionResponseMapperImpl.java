@@ -24,6 +24,8 @@ public class TransactionResponseMapperImpl implements TransactionResponseMapper 
         transactionResponseDTO.amount( entity.getAmount() );
         transactionResponseDTO.createdAt( entity.getCreatedAt() );
         transactionResponseDTO.updatedAt( entity.getUpdatedAt() );
+        transactionResponseDTO.originAccount( entity.getOrigin().getId() );
+        transactionResponseDTO.destinationAccount( entity.getDestination().getId() );
 
         if ( entity.getStatus() != null ) {
             transactionResponseDTO.status( entity.getStatus().name() );

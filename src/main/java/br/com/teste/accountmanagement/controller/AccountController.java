@@ -1,9 +1,9 @@
 package br.com.teste.accountmanagement.controller;
 
 import br.com.teste.accountmanagement.dto.request.CreateAccountRequestDTO;
+import br.com.teste.accountmanagement.dto.response.AccountResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PostResponseDTO;
-import br.com.teste.accountmanagement.model.Account;
 import br.com.teste.accountmanagement.service.AccountService;
 import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
@@ -36,7 +36,7 @@ public class AccountController {
     public ResponseEntity<PostResponseDTO> create(
             @RequestBody @Valid CreateAccountRequestDTO account,
             @PathVariable Long customerId) {
-        Account createdAccount = accountService.create(account, customerId);
+        AccountResponseDTO createdAccount = accountService.create(account, customerId);
 
         URI locationResource = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

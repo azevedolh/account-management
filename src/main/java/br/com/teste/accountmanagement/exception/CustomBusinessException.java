@@ -26,8 +26,4 @@ public class CustomBusinessException extends RuntimeException {
         this.httpStatus = httpStatus;
         this.details = details;
     }
-
-    public CustomBusinessException(String msg, Exception e) {
-        super(msg, e);
-    }
 }

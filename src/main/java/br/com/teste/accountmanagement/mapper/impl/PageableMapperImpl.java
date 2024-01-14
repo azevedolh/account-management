@@ -13,7 +13,7 @@ public class PageableMapperImpl implements PageableMapper {
         return PageableResponseDTO.builder()
                 ._limit(page.getPageable().getPageSize())
                 ._offset(page.getPageable().getOffset())
-                ._pageNumber(page.getNumber())
+                ._pageNumber(page.getNumber() + 1)
                 ._pageElements(page.getNumberOfElements())
                 ._totalPages(page.getTotalPages())
                 ._totalElements(page.getTotalElements())

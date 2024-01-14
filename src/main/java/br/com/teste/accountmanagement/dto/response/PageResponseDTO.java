@@ -9,8 +9,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PageResponseDTO {
+public class PageResponseDTO<T> {
 
     private PageableResponseDTO _pageable;
-    private List<?> _content;
+    private List<T> _content;
 }

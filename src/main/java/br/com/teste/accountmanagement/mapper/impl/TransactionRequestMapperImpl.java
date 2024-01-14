@@ -18,7 +18,7 @@ public class TransactionRequestMapperImpl implements TransactionRequestMapper {
 
         Transaction.TransactionBuilder transaction = Transaction.builder();
 
-        transaction.destination(Account.builder().id(dto.getDestination()).build());
+        transaction.destination(Account.builder().id(dto.getDestinationAccount()).build());
         transaction.origin(Account.builder().id(origin).build());
         transaction.amount(dto.getAmount());
         transaction.status(TransactionStatusEnum.EFETIVADO);

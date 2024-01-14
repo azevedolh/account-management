@@ -1,4 +1,4 @@
-package br.com.teste.accountmanagement.dto;
+package br.com.teste.accountmanagement.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationResponseDTO {
-
-    private Boolean messageSent;
+public class NotificationRequestDTO {
+    private Long sendTo;
+    private String message;
 }

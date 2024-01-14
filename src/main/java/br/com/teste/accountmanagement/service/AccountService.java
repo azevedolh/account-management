@@ -1,6 +1,7 @@
 package br.com.teste.accountmanagement.service;
 
 import br.com.teste.accountmanagement.dto.request.CreateAccountRequestDTO;
+import br.com.teste.accountmanagement.dto.response.AccountResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
 import br.com.teste.accountmanagement.enumerator.OperationEnum;
 import br.com.teste.accountmanagement.exception.CustomBusinessException;
@@ -12,7 +13,7 @@ public interface AccountService {
 
     PageResponseDTO getAccounts(Long customerId, Integer page, Integer size, String sort);
 
-    Account create(CreateAccountRequestDTO account, Long customerId);
+    AccountResponseDTO create(CreateAccountRequestDTO account, Long customerId);
 
     Account getById(Long accountId);
 

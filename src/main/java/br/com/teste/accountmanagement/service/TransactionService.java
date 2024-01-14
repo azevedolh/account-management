@@ -7,7 +7,7 @@ import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
 
 public interface TransactionService {
 
-    PageResponseDTO getTransactions(Long accountId, Integer page, Integer size, String sort);
+    PageResponseDTO getTransactions(Long customerId, Long accountId, Integer page, Integer size, String sort);
 
     NewTransactionResponseDTO create(CreateTransactionRequestDTO transaction, Long origin, Long originCustomer);
 

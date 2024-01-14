@@ -1,6 +1,7 @@
 package br.com.teste.accountmanagement.service.impl;
 
 import br.com.teste.accountmanagement.dto.request.CreateAccountRequestDTO;
+import br.com.teste.accountmanagement.dto.response.AccountResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
 import br.com.teste.accountmanagement.enumerator.OperationEnum;
 import br.com.teste.accountmanagement.exception.CustomBusinessException;
@@ -60,11 +61,12 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Account create(CreateAccountRequestDTO accountRequest, Long customerId) {
+    public AccountResponseDTO create(CreateAccountRequestDTO accountRequest, Long customerId) {
         Customer customer = customerService.getById(customerId);
         Account account = accountRequestMapper.toEntity(accountRequest);
         account.setCustomer(customer);
-        return accountRepository.save(account);
+        account = accountRepository.save(account);
+        return accountResponseMapper.toDto(account);
     }
 
     @Override

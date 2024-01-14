@@ -1,10 +1,12 @@
 package br.com.teste.accountmanagement.service.impl;
 
-import br.com.teste.accountmanagement.dto.NotificationResponseDTO;
+import br.com.teste.accountmanagement.dto.request.NotificationRequestDTO;
+import br.com.teste.accountmanagement.dto.response.NotificationResponseDTO;
 import br.com.teste.accountmanagement.exception.CustomBusinessException;
 import br.com.teste.accountmanagement.service.NotificationService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,19 +18,29 @@ public class NotificationServiceImpl implements NotificationService {
     @Autowired
     private RestTemplate restTemplate;
 
+    @Value("${notification.service.url}")
+    private String NOTIFICATION_SERVICE_URL;
+
 
     @Override
-    public void sendNotification(Long customerId) throws CustomBusinessException {
+    public void sendNotification(Long customerId, String message) throws CustomBusinessException {
+        NotificationRequestDTO notificationRequestDTO = NotificationRequestDTO.builder()
+                .sendTo(customerId)
+                .message(message)
+                .build();
+
         ResponseEntity<NotificationResponseDTO> response =
-                restTemplate.getForEntity(
-                        "https://run.mocky.io/v3/9769bf3a-b0b6-477a-9ff5-91f63010c9d3",
+                restTemplate.postForEntity(
+                        NOTIFICATION_SERVICE_URL,
+                        notificationRequestDTO,
                         NotificationResponseDTO.class
                 );
 
         if (response.getStatusCode() != HttpStatus.OK) {
+            log.info("erro no envio da notificação. userId: " + customerId + ", mensagem: " + message);
             throw new CustomBusinessException("erro no envio da notificação.", "userId: " + customerId);
         }
 
-        log.info("SUCESSO NO ENVIO DA NOTIFICACAO: " + response.getBody().toString());
+        log.info("SUCESSO NO ENVIO DA NOTIFICACAO: userId: " + customerId + ", mensagem: " + message);
     }
 }

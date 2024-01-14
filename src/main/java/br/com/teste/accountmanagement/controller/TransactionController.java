@@ -28,8 +28,15 @@ public class TransactionController {
             @RequestParam(value = "page", required = false, defaultValue = "1") Integer page,
             @RequestParam(value = "size", required = false, defaultValue = "10") Integer size,
             @RequestParam(value = "_sort", required = false) String sort,
+            @PathVariable Long customerId,
             @PathVariable Long accountId) {
-        return new ResponseEntity<PageResponseDTO>(transactionService.getTransactions(accountId, page, size, sort), HttpStatus.OK);
+        return new ResponseEntity<PageResponseDTO>(transactionService.getTransactions(
+                customerId,
+                accountId,
+                page,
+                size,
+                sort),
+                HttpStatus.OK);
     }
 
     @PostMapping("/transactions")

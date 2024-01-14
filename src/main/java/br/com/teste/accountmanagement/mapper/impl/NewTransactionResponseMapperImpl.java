@@ -6,9 +6,6 @@ import br.com.teste.accountmanagement.mapper.NewTransactionResponseMapper;
 import br.com.teste.accountmanagement.model.Transaction;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Component
 public class NewTransactionResponseMapperImpl implements NewTransactionResponseMapper {
 
@@ -22,6 +19,9 @@ public class NewTransactionResponseMapperImpl implements NewTransactionResponseM
 
         transactionResponseDTO.id( entity.getId() );
         transactionResponseDTO.amount( entity.getAmount() );
+        transactionResponseDTO.originAccount( entity.getOrigin().getId() );
+        transactionResponseDTO.destinationAccount( entity.getDestination().getId() );
+
         if ( entity.getStatus() != null ) {
             transactionResponseDTO.status( entity.getStatus().name() );
         }
@@ -35,19 +35,5 @@ public class NewTransactionResponseMapperImpl implements NewTransactionResponseM
         }
 
         return transactionResponseDTO.build();
-    }
-
-    @Override
-    public List<NewTransactionResponseDTO> toDto(List<Transaction> dtoList, Long accountNumber) {
-        if ( dtoList == null && accountNumber != null) {
-            return null;
-        }
-
-        List<NewTransactionResponseDTO> list = new ArrayList<NewTransactionResponseDTO>( dtoList.size() );
-        for ( Transaction transaction : dtoList ) {
-            list.add( toDto( transaction, accountNumber ) );
-        }
-
-        return list;
     }
 }
