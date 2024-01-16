@@ -54,14 +54,14 @@ public class TransactionController {
         return ResponseEntity.created(locationResource).body(createdTransaction);
     }
 
-    @PostMapping("/transactions:cancel")
+    @PostMapping("/transactions/{transactionId}/cancel")
     public ResponseEntity<NewTransactionResponseDTO> cancel(
-            @RequestBody @Valid CancelTransactionRequestDTO transaction,
-            @PathVariable Long accountId) {
-        NewTransactionResponseDTO createdTransaction = transactionService.cancel(transaction, accountId);
+        @PathVariable Long accountId,
+        @PathVariable Long transactionId) {
+        NewTransactionResponseDTO createdTransaction = transactionService.cancel(transactionId, accountId);
 
         log.info("Successfully cancelled Transaction with ID: "
-                + transaction.getId()
+                + transactionId
                 + " and created Transaction with ID: "
                 + createdTransaction.getId());
         return new ResponseEntity<NewTransactionResponseDTO>(createdTransaction, HttpStatus.OK);

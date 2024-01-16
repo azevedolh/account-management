@@ -196,7 +196,7 @@ Response:
 }
 ```
 
-#### POST /customers/{customer_id}/accounts/{account_id}/transactions:cancel
+#### POST /customers/{customer_id}/accounts/{account_id}/transactions/{transaction_id}/cancel
 Um endpoint extra foi adicionado para realizar cancelamento de transação, ele faz o processo inverso da transação cancelada que é enviada no corpo da requisição. Assim como na criação é devolvido a informação se a notificação foi enviada e os dados da nova transação criada para reversão.
 
 Request:

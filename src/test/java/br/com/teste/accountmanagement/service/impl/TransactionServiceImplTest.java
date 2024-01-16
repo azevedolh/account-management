@@ -295,14 +295,12 @@ class TransactionServiceImplTest {
     void testShouldCancelTransactionAndCreateANewOneWithTheOpositeOperation() {
         Transaction transaction = TestUtils.generateATransaction();
 
-        CancelTransactionRequestDTO transactionRequestDTO = CancelTransactionRequestDTO.builder().id(1L).build();
-
         when(accountService.getById(1L)).thenReturn(transaction.getOrigin());
         when(accountService.getById(2l)).thenReturn(transaction.getDestination());
         when(repository.findById(anyLong())).thenReturn(Optional.of(transaction));
         when(repository.save(any())).thenReturn(transaction);
 
-        NewTransactionResponseDTO responseDTO = transactionService.cancel(transactionRequestDTO, 1L);
+        NewTransactionResponseDTO responseDTO = transactionService.cancel(1L, 1L);
 
         verify(repository, times(2)).save(transactionCaptor.capture());
 
@@ -320,11 +318,9 @@ class TransactionServiceImplTest {
 
     @Test
     void testShouldThrowExceptionWhenTransactionNotFound() {
-        CancelTransactionRequestDTO transactionRequestDTO = CancelTransactionRequestDTO.builder().id(1L).build();
-
         CustomBusinessException exception = assertThrows(
                 CustomBusinessException.class,
-                () -> transactionService.cancel(transactionRequestDTO, 1L),
+                () -> transactionService.cancel(1L, 1L),
                 "Should throw an exception");
 
         assertTrue(exception.getMessage().contains("Transação não encontrada"),
@@ -336,13 +332,11 @@ class TransactionServiceImplTest {
         Transaction transaction = TestUtils.generateATransaction();
         transaction.setStatus(TransactionStatusEnum.ANULADO);
 
-        CancelTransactionRequestDTO transactionRequestDTO = CancelTransactionRequestDTO.builder().id(1L).build();
-
         when(repository.findById(anyLong())).thenReturn(Optional.of(transaction));
 
         CustomBusinessException exception = assertThrows(
                 CustomBusinessException.class,
-                () -> transactionService.cancel(transactionRequestDTO, 1L),
+                () -> transactionService.cancel(1L, 1L),
                 "Should throw an exception");
 
         assertTrue(exception.getMessage().contains("Não é possível cancelar uma transação anulada"),

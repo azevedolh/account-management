@@ -11,6 +11,6 @@ public interface TransactionService {
 
     NewTransactionResponseDTO create(CreateTransactionRequestDTO transaction, Long origin, Long originCustomer);
 
-    NewTransactionResponseDTO cancel(CancelTransactionRequestDTO transaction, Long accountId);
+    NewTransactionResponseDTO cancel(Long transactionId, Long accountId);
 
 }

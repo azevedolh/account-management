@@ -97,15 +97,11 @@ class TransactionControllerTest {
     @Test
     void testShouldReturnStatusOkAndNewTransactionGeneratedAfterCancelling() throws Exception {
         NewTransactionResponseDTO response = NewTransactionResponseDTO.builder().id(1L).build();
-        CancelTransactionRequestDTO request = CancelTransactionRequestDTO.builder().id(1L).build();
         ObjectMapper objectMapper = new ObjectMapper();
-        String jsonRequest = objectMapper.writeValueAsString(request);
         when(transactionService.cancel(any(), anyLong())).thenReturn(response);
 
-        mockMvc.perform(post("/api/v1/customers/1/accounts/1/transactions:cancel")
+        mockMvc.perform(post("/api/v1/customers/1/accounts/1/transactions/1/cancel")
                         .characterEncoding("UTF-8")
-                        .content(jsonRequest)
-                        .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())

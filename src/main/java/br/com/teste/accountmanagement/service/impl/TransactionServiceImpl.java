@@ -164,8 +164,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     @Transactional
-    public NewTransactionResponseDTO cancel(CancelTransactionRequestDTO transactionRequest, Long accountId) {
-        Transaction transaction = getById(transactionRequest.getId());
+    public NewTransactionResponseDTO cancel(Long transactionId, Long accountId) {
+        Transaction transaction = getById(transactionId);
 
         if (TransactionStatusEnum.ANULADO.equals(transaction.getStatus())) {
             throw new CustomBusinessException("Não é possível cancelar uma transação anulada");

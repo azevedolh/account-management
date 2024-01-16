@@ -118,7 +118,7 @@
 			"response": []
 		},
 		{
-			"name": "transactions:cancel",
+			"name": "transactions/{id}/cancel",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -131,7 +131,7 @@
 						}
 					}
 				},
-				"url": "localhost:8080/account-management/api/v1/customers/1/accounts/1/transactions:cancel"
+				"url": "localhost:8080/account-management/api/v1/customers/1/accounts/1/transactions/1/cancel"
 			},
 			"response": []
 		}
