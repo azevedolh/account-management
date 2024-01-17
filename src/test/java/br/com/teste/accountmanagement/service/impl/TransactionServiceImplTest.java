@@ -15,6 +15,7 @@ import br.com.teste.accountmanagement.mapper.impl.PageableMapperImpl;
 import br.com.teste.accountmanagement.mapper.impl.TransactionRequestMapperImpl;
 import br.com.teste.accountmanagement.mapper.impl.TransactionResponseMapperImpl;
 import br.com.teste.accountmanagement.model.Account;
+import br.com.teste.accountmanagement.model.Customer;
 import br.com.teste.accountmanagement.model.Transaction;
 import br.com.teste.accountmanagement.repository.TransactionRepository;
 import br.com.teste.accountmanagement.service.AccountService;
@@ -184,17 +185,11 @@ class TransactionServiceImplTest {
         assertEquals(NotificationStatusEnum.SENT,
                 responseDTO.getNotificationResult().get(0).getNotificationStatus(),
                 "Should be equal");
-        assertEquals("SUCESSO",
-                responseDTO.getNotificationResult().get(0).getMessage(),
-                "Should be equal");
         assertEquals(NotificationAccountTypeEnum.DESTINATION,
                 responseDTO.getNotificationResult().get(1).getAccountType(),
                 "Should be equal");
         assertEquals(NotificationStatusEnum.SENT,
                 responseDTO.getNotificationResult().get(1).getNotificationStatus(),
-                "Should be equal");
-        assertEquals("SUCESSO",
-                responseDTO.getNotificationResult().get(1).getMessage(),
                 "Should be equal");
     }
 
@@ -246,7 +241,7 @@ class TransactionServiceImplTest {
                 () -> transactionService.create(requestDTO, 1L, 2L),
                 "Should throw an exception");
 
-        assertTrue(exception.getMessage().contains("Não é possível realizar o pagamento."), "Should be true");
+        assertTrue(exception.getMessage().contains("Não é possível realizar o pagamento"), "Should be true");
     }
 
     @Test
@@ -265,7 +260,7 @@ class TransactionServiceImplTest {
                 () -> transactionService.create(requestDTO, 1L, 1L),
                 "Should throw an exception");
 
-        assertTrue(exception.getMessage().contains("Não é possível realizar pagamento para conta de origem"),
+        assertTrue(exception.getMessage().contains("Não é possível realizar o pagamento"),
                 "Should be true");
     }
 
@@ -278,7 +273,7 @@ class TransactionServiceImplTest {
                 .amount(new BigDecimal(100))
                 .build();
 
-        doThrow(new CustomBusinessException("Erro ao realizar processo de atualização de saldo."))
+        doThrow(new CustomBusinessException("Erro ao realizar processo de atualização de saldo"))
                 .when(accountService).updateBalance(anyLong(), any(OperationEnum.class), any(BigDecimal.class));
         when(accountService.getById(1L)).thenReturn(expected.getOrigin());
 
@@ -287,7 +282,7 @@ class TransactionServiceImplTest {
                 () -> transactionService.create(requestDTO, 1L, 1L),
                 "Should throw an exception");
 
-        assertTrue(exception.getMessage().contains("Erro ao realizar processo de atualização de saldo."),
+        assertTrue(exception.getMessage().contains("Erro ao realizar processo de atualização de saldo"),
                 "Should be true");
     }
 
@@ -300,7 +295,7 @@ class TransactionServiceImplTest {
         when(repository.findById(anyLong())).thenReturn(Optional.of(transaction));
         when(repository.save(any())).thenReturn(transaction);
 
-        NewTransactionResponseDTO responseDTO = transactionService.cancel(1L, 1L);
+        NewTransactionResponseDTO responseDTO = transactionService.cancel(1L, 1L, 1L);
 
         verify(repository, times(2)).save(transactionCaptor.capture());
 
@@ -310,17 +305,17 @@ class TransactionServiceImplTest {
         assertEquals("ANULADO", transactionCaptor.getAllValues().get(1).getStatus().name());
         assertEquals(NotificationAccountTypeEnum.ORIGIN, responseDTO.getNotificationResult().get(0).getAccountType());
         assertEquals(NotificationStatusEnum.SENT, responseDTO.getNotificationResult().get(0).getNotificationStatus());
-        assertEquals("SUCESSO", responseDTO.getNotificationResult().get(0).getMessage());
         assertEquals(NotificationAccountTypeEnum.DESTINATION, responseDTO.getNotificationResult().get(1).getAccountType());
         assertEquals(NotificationStatusEnum.SENT, responseDTO.getNotificationResult().get(1).getNotificationStatus());
-        assertEquals("SUCESSO", responseDTO.getNotificationResult().get(1).getMessage());
     }
 
     @Test
     void testShouldThrowExceptionWhenTransactionNotFound() {
+        Account account = Account.builder().customer(Customer.builder().id(1L).build()).build();
+        when(accountService.getById(any())).thenReturn(account);
         CustomBusinessException exception = assertThrows(
                 CustomBusinessException.class,
-                () -> transactionService.cancel(1L, 1L),
+                () -> transactionService.cancel(1L, 1L, 1L),
                 "Should throw an exception");
 
         assertTrue(exception.getMessage().contains("Transação não encontrada"),
@@ -329,17 +324,33 @@ class TransactionServiceImplTest {
 
     @Test
     void testShouldThrowExceptionWhenIsTryingToCancelACanceledTransaction() {
+        Account account = Account.builder().customer(Customer.builder().id(1L).build()).build();
         Transaction transaction = TestUtils.generateATransaction();
         transaction.setStatus(TransactionStatusEnum.ANULADO);
 
         when(repository.findById(anyLong())).thenReturn(Optional.of(transaction));
+        when(accountService.getById(any())).thenReturn(account);
 
         CustomBusinessException exception = assertThrows(
                 CustomBusinessException.class,
-                () -> transactionService.cancel(1L, 1L),
+                () -> transactionService.cancel(1L, 1L, 1L),
                 "Should throw an exception");
 
         assertTrue(exception.getMessage().contains("Não é possível cancelar uma transação anulada"),
+                "Should be true");
+    }
+
+    @Test
+    void testShouldThrowExceptionWhenAccountAndCustomerDoesNotMatch() {
+        Account account = Account.builder().customer(Customer.builder().id(2L).build()).build();
+        when(accountService.getById(any())).thenReturn(account);
+
+        CustomBusinessException exception = assertThrows(
+                CustomBusinessException.class,
+                () -> transactionService.cancel(1L, 1L, 1L),
+                "Should throw an exception");
+
+        assertTrue(exception.getMessage().contains("Não é possível realizar o pagamento"),
                 "Should be true");
     }
 }

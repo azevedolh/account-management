@@ -20,8 +20,12 @@ import java.net.URI;
 @RequestMapping("/api/v1/customers/{customerId}/accounts")
 public class AccountController {
 
-    @Autowired
     private AccountService accountService;
+
+    @Autowired
+    public AccountController(AccountService accountService) {
+        this.accountService = accountService;
+    }
 
     @GetMapping
     public ResponseEntity<PageResponseDTO> getAll(

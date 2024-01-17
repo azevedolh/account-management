@@ -20,8 +20,12 @@ import java.net.URI;
 @RequestMapping("/api/v1/customers/{customerId}/accounts/{accountId}")
 public class TransactionController {
 
-    @Autowired
     private TransactionService transactionService;
+
+    @Autowired
+    public TransactionController(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
 
     @GetMapping("/transactions")
     public ResponseEntity<PageResponseDTO> getAll(
@@ -57,8 +61,9 @@ public class TransactionController {
     @PostMapping("/transactions/{transactionId}/cancel")
     public ResponseEntity<NewTransactionResponseDTO> cancel(
         @PathVariable Long accountId,
-        @PathVariable Long transactionId) {
-        NewTransactionResponseDTO createdTransaction = transactionService.cancel(transactionId, accountId);
+        @PathVariable Long transactionId,
+        @PathVariable Long customerId) {
+        NewTransactionResponseDTO createdTransaction = transactionService.cancel(transactionId, accountId, customerId);
 
         log.info("Successfully cancelled Transaction with ID: "
                 + transactionId

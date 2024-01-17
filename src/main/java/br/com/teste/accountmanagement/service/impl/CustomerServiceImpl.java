@@ -3,6 +3,7 @@ package br.com.teste.accountmanagement.service.impl;
 import br.com.teste.accountmanagement.dto.request.CreateCustomerRequestDTO;
 import br.com.teste.accountmanagement.dto.response.CustomerResponseDTO;
 import br.com.teste.accountmanagement.dto.response.PageResponseDTO;
+import br.com.teste.accountmanagement.enumerator.DocumentTypeEnum;
 import br.com.teste.accountmanagement.exception.CustomBusinessException;
 import br.com.teste.accountmanagement.mapper.CustomerRequestMapper;
 import br.com.teste.accountmanagement.mapper.CustomerResponseMapper;
@@ -11,7 +12,8 @@ import br.com.teste.accountmanagement.model.Customer;
 import br.com.teste.accountmanagement.repository.CustomerRepository;
 import br.com.teste.accountmanagement.service.CustomerService;
 import br.com.teste.accountmanagement.specification.CustomerSpecifications;
-import br.com.teste.accountmanagement.util.PaginationUtils;
+import br.com.teste.accountmanagement.util.MessageUtil;
+import br.com.teste.accountmanagement.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,24 +24,30 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
+import static br.com.teste.accountmanagement.util.ConstantUtil.SORT_BY_CREATED_AT;
+
 @Service
 public class CustomerServiceImpl implements CustomerService {
 
-    @Autowired
     private CustomerRepository customerRepository;
-
-    @Autowired
     private PageableMapper pageableMapper;
-
-    @Autowired
     private CustomerResponseMapper customerResponseMapper;
+    private CustomerRequestMapper customerRequestMapper;
 
     @Autowired
-    private CustomerRequestMapper customerRequestMapper;
+    public CustomerServiceImpl(CustomerRepository customerRepository,
+                               PageableMapper pageableMapper,
+                               CustomerResponseMapper customerResponseMapper,
+                               CustomerRequestMapper customerRequestMapper) {
+        this.customerRepository = customerRepository;
+        this.pageableMapper = pageableMapper;
+        this.customerResponseMapper = customerResponseMapper;
+        this.customerRequestMapper = customerRequestMapper;
+    }
 
     @Override
     public PageResponseDTO getCustomers(String name, String document, Integer page, Integer size, String sort) {
-        Sort sortProperties = PaginationUtils.getSort(sort, Sort.Direction.DESC, "createdAt");
+        Sort sortProperties = PaginationUtil.getSort(sort, Sort.Direction.DESC, SORT_BY_CREATED_AT);
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, sortProperties);
         PageResponseDTO pageResponseDTO = new PageResponseDTO();
@@ -58,7 +66,14 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> existingCustomer = customerRepository.findByDocument(customerRequest.getDocument());
 
         if (existingCustomer.isPresent()) {
-            throw new CustomBusinessException("Já existe um cliente cadastrado com este documento");
+            String message = MessageUtil.getMessage("customer.already.exists");
+            throw new CustomBusinessException(message);
+        }
+
+        if (!DocumentTypeEnum.isValid(customerRequest.getDocumentType())) {
+            String message = MessageUtil.getMessage("customer.document.type");
+            String details = MessageUtil.getMessage("customer.document.type.details");
+            throw new CustomBusinessException(message, details);
         }
 
         Customer customer = customerRequestMapper.toEntity(customerRequest);
@@ -74,7 +89,8 @@ public class CustomerServiceImpl implements CustomerService {
         Optional<Customer> customerOptional = customerRepository.findById(id);
 
         if (customerOptional.isEmpty()) {
-            throw new CustomBusinessException(HttpStatus.NOT_FOUND, "Cliente com Id " + id + " não encontrado.");
+            String message = MessageUtil.getMessage("customer.not.found", id.toString());
+            throw new CustomBusinessException(HttpStatus.NOT_FOUND, message);
         }
 
         return customerOptional.get();

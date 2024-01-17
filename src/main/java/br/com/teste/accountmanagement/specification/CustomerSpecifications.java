@@ -24,6 +24,7 @@ public class CustomerSpecifications {
     }
 
     public static Specification<Customer> nameContains(String name) {
-        return (root, criteriaQuery, criteriaBuilder) -> criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + name.toUpperCase() + "%");
+        return (root, criteriaQuery, criteriaBuilder) ->
+                criteriaBuilder.like(criteriaBuilder.upper(root.get("name")), "%" + name.toUpperCase() + "%");
     }
 }

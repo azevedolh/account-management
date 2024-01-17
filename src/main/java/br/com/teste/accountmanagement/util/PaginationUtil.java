@@ -6,7 +6,7 @@ import org.springframework.data.domain.Sort.Direction;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PaginationUtils {
+public class PaginationUtil {
     public static Sort getSort(String sort, Direction defaultDirection, String defaultProperty) {
         if (sort != null) {
             List<Sort.Order> orders = new ArrayList<>();

@@ -13,7 +13,8 @@ import br.com.teste.accountmanagement.model.Customer;
 import br.com.teste.accountmanagement.repository.AccountRepository;
 import br.com.teste.accountmanagement.service.AccountService;
 import br.com.teste.accountmanagement.service.CustomerService;
-import br.com.teste.accountmanagement.util.PaginationUtils;
+import br.com.teste.accountmanagement.util.MessageUtil;
+import br.com.teste.accountmanagement.util.PaginationUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,29 +25,35 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static br.com.teste.accountmanagement.util.ConstantUtil.SORT_BY_CREATED_AT;
+
 @Service
 public class AccountServiceImpl implements AccountService {
 
-    @Autowired
     private AccountRepository accountRepository;
-
-    @Autowired
     private PageableMapper pageableMapper;
-
-    @Autowired
     private AccountResponseMapper accountResponseMapper;
-
-    @Autowired
     private AccountRequestMapper accountRequestMapper;
+    private CustomerService customerService;
 
     @Autowired
-    private CustomerService customerService;
+    public AccountServiceImpl(AccountRepository accountRepository,
+                              PageableMapper pageableMapper,
+                              AccountResponseMapper accountResponseMapper,
+                              AccountRequestMapper accountRequestMapper,
+                              CustomerService customerService) {
+        this.accountRepository = accountRepository;
+        this.pageableMapper = pageableMapper;
+        this.accountResponseMapper = accountResponseMapper;
+        this.accountRequestMapper = accountRequestMapper;
+        this.customerService = customerService;
+    }
 
     @Override
     public PageResponseDTO getAccounts(Long customerId, Integer page, Integer size, String sort) {
         Customer customer = customerService.getById(customerId);
 
-        Sort sortProperties = PaginationUtils.getSort(sort, Sort.Direction.DESC, "createdAt");
+        Sort sortProperties = PaginationUtil.getSort(sort, Sort.Direction.DESC, SORT_BY_CREATED_AT);
 
         PageRequest pageRequest = PageRequest.of(page - 1, size, sortProperties);
         PageResponseDTO pageResponseDTO = new PageResponseDTO();
@@ -74,7 +81,8 @@ public class AccountServiceImpl implements AccountService {
         Optional<Account> accountOptional = accountRepository.findById(id);
 
         if (accountOptional.isEmpty()) {
-            throw new CustomBusinessException(HttpStatus.NOT_FOUND, "Conta numero " + id + " não encontrada.");
+            String message = MessageUtil.getMessage("account.not.found", id.toString());
+            throw new CustomBusinessException(HttpStatus.NOT_FOUND, message);
         }
 
         return accountOptional.get();
@@ -86,16 +94,20 @@ public class AccountServiceImpl implements AccountService {
         Account account = getById(accountId);
 
         if (operation == null) {
-            throw new CustomBusinessException("Operação não informada");
+            String message = MessageUtil.getMessage("account.operation.not.informed");
+            throw new CustomBusinessException(message);
         }
 
         if (amount == null || amount.compareTo(new BigDecimal("0")) <= 0) {
-            throw new CustomBusinessException("Valor informado para operação inválido");
+            String message = MessageUtil.getMessage("account.amount.invalid");
+            String details = MessageUtil.getMessage("account.amount.invalid.details");
+            throw new CustomBusinessException(message, details);
         }
 
         if (OperationEnum.DEBITO == operation) {
             if (amount.compareTo(account.getBalance()) > 0) {
-                throw new CustomBusinessException("Conta não possui saldo suficiente para o pagamento");
+                String message = MessageUtil.getMessage("account.not.enough.balance");
+                throw new CustomBusinessException(message);
             }
 
             account.setBalance(account.getBalance().subtract(amount));

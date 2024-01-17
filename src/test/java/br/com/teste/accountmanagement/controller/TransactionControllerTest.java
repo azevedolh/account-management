@@ -98,7 +98,7 @@ class TransactionControllerTest {
     void testShouldReturnStatusOkAndNewTransactionGeneratedAfterCancelling() throws Exception {
         NewTransactionResponseDTO response = NewTransactionResponseDTO.builder().id(1L).build();
         ObjectMapper objectMapper = new ObjectMapper();
-        when(transactionService.cancel(any(), anyLong())).thenReturn(response);
+        when(transactionService.cancel(any(), anyLong(), anyLong())).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/customers/1/accounts/1/transactions/1/cancel")
                         .characterEncoding("UTF-8")

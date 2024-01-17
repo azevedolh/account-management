@@ -52,7 +52,7 @@ class NotificationServiceImplTest {
                 () -> notificationService.sendNotification(1L, "Mensagem de teste"),
                 "Should throw an exception");
 
-        assertTrue(exception.getMessage().contains("erro no envio da notificação"), "Should be true");
+        assertTrue(exception.getMessage().contains("Erro no envio da notificação"), "Should be true");
         verify(restTemplate).postForEntity(any(String.class), any(NotificationRequestDTO.class), any(Class.class));
     }
 }

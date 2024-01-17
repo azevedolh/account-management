@@ -32,7 +32,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ApiErrorResponseDTO> handleException(MethodArgumentNotValidException ex, WebRequest request) {
         ApiErrorResponseDTO apiErrorResponseDTO = new ApiErrorResponseDTO(
-                ex.getStatusCode() == null ? HttpStatus.BAD_REQUEST : (HttpStatus) ex.getStatusCode(),
+                (HttpStatus) ex.getStatusCode(),
                 2000,
                 "ERROR",
                 ex.getBody().getDetail(),

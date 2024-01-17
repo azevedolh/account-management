@@ -9,6 +9,7 @@ Projeto para gerenciar contas de clientes e suas transações. Projeto desenvolv
 - **Junit/Mockito**
 - **Mapstruct**
 - **Lombok**
+- **Maven**
 
 ## Rodar Localmente
 
@@ -133,7 +134,7 @@ Response:
 ### Criação de transações
 
 #### POST /customers/{customer_id}/accounts/{account_id}/transactions
-Para criar uma transação (pagamento) é necessário informar no path id do cliente e da conta de origem e no body informações da conta destino e valor. Na resposta está sendo devolvido os dados da transação criada e o status do envio da notificação, o sistema foi construido para concretizar o pagamento mesmo em caso de erro no envio da notificação. Caso o pagamento seja entre contas do mesmo cliente apenas uma notificação é enviada. 
+Para criar uma transação (pagamento) é necessário informar no path id do cliente e da conta de origem e no body informações da conta destino e valor. Na resposta está sendo devolvido os dados da transação criada e o status do envio da notificação, o sistema foi construido para concretizar o pagamento mesmo em caso de erro no envio da notificação. 
 
 Request:
 ```json
@@ -155,12 +156,12 @@ Response:
     {
       "accountType": "ORIGIN",
       "notificationStatus": "SENT",
-      "message": "SUCESSO"
+      "message": "Realizado pagamento de R$ 1000 reais"
     },
     {
       "accountType": "DESTINATION",
       "notificationStatus": "SENT",
-      "message": "SUCESSO"
+      "message": "Recebido pagamento de R$ 1000 reais"
     }
   ]
 }
@@ -197,15 +198,8 @@ Response:
 ```
 
 #### POST /customers/{customer_id}/accounts/{account_id}/transactions/{transaction_id}/cancel
-Um endpoint extra foi adicionado para realizar cancelamento de transação, ele faz o processo inverso da transação cancelada que é enviada no corpo da requisição. Assim como na criação é devolvido a informação se a notificação foi enviada e os dados da nova transação criada para reversão.
+Um endpoint extra foi adicionado para realizar cancelamento de transação, ele faz o processo inverso da transação cancelada que é informada no path da requisição. Assim como na criação é devolvido a informação se a notificação foi enviada e os dados da nova transação criada para reversão.
 
-Request:
-```json
-{
-  "destinationAccount": 2,
-  "amount": 1000
-}
-```
 Response:
 ```json
 {
@@ -219,12 +213,12 @@ Response:
     {
       "accountType": "ORIGIN",
       "notificationStatus": "SENT",
-      "message": "SUCESSO"
+      "message": "Realizado pagamento de R$ 1000 reais"
     },
     {
       "accountType": "DESTINATION",
       "notificationStatus": "SENT",
-      "message": "SUCESSO"
+      "message": "Recebido pagamento de R$ 1000 reais"
     }
   ]
 }
@@ -235,10 +229,10 @@ Foram identificados alguns pontos de melhoria que podem ir sendo implementados p
 - Separar em mais Microserviços. (À avaliar dependendo de quantidade de desenvolvedores, escalabilidade.)
 - Mudar estratégia de numero da conta para considerar a Agência utilizando @EmbbededId e ir incrementando a conta considerando a agência.
 - Envio de notificação ser Assíncrono (avaliar se resultado do envio é necessário) **OU** Fazer processo ser desfeito caso a notificação não seja enviada lançando uma exceção.
+- Fazer mais de uma tentativa de envio da notificação.
 - Configurar spring security baseado em perfis de acesso e autenticação.
 - Utilizar criptografia nos dados sensíveis.
-- Utilizar message.properties nas mensagens e utilizar internacionalização para exibição nos tratamentos de erro.
 - Revisar queries geradas pelo hibernate visando eliminar complexidade desnecessária (joins) e visando queries mais performáticas.
-- Melhorar tratamento de erro.
+- Melhorar tratamento de erro, fazendo um maior detalhamento, mapeando mais exceções no exception handler, personalizando mensagens de validação do bean validation, etc. 
 - Endpoint para alterar dados de cliente e contas.
 - Acrescentar mais cenários de teste
